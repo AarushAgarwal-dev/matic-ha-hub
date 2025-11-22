@@ -3,7 +3,8 @@
 > **The missing link between Matic Robots and your Smart Home.**
 **Matic Home Hub** is a local-first, privacy-focused bridge that connects your Matic robot vacuums to Home Assistant via MQTT. It unlocks the full potential of your robot without compromising on the privacy values that Matic stands for.
 
-![Dashboard Screenshot](https://via.placeholder.com/800x400?text=Matic+Home+Hub+Dashboard)
+<img width="1882" height="1042" alt="image" src="https://github.com/user-attachments/assets/96ec9633-f0d3-4ac0-bfab-fd7b9e9af4f6" />
+
 
 ## 🚀 Features
 
@@ -60,12 +61,10 @@ SCAN_INTERVAL = 5
 
 ## 🤝 Contributing
 
-We love contributions! Please see `CONTRIBUTING.md` for details.
+Email me at agarw574@purdue.edu
 
 ## 📄 License
 
 MIT License. See `LICENSE` for more information.
 
 ---
-
-*Built with ❤️ for the Matic Community.*
