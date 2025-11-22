@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  matic-hub:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - MQTT_BROKER_URL=mosquitto
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./config:/app/config
+    networks:
+      - matic-network
+    depends_on:
+      - mosquitto
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - matic-network
+
+networks:
+  matic-network:
+    driver: bridge

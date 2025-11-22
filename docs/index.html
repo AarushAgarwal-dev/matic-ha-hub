@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matic Home Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Dark Mode (Default) */
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #f97316;
+            --accent-hover: #ea580c;
+            --accent-glow: rgba(249, 115, 22, 0.3);
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --sidebar-bg: rgba(15, 23, 42, 0.8);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f4f8;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(0, 0, 0, 0.05);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent: #ea580c;
+            --accent-hover: #c2410c;
+            --accent-glow: rgba(234, 88, 12, 0.2);
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --danger: #dc2626;
+            --sidebar-bg: rgba(255, 255, 255, 0.8);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(34, 197, 94, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+            /* Prevent body scroll, main handles it */
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid var(--card-border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+            filter: drop-shadow(0 0 8px var(--accent-glow));
+        }
+
+        .nav-item {
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background-color: rgba(249, 115, 22, 0.15);
+            color: var(--accent);
+            border-color: rgba(249, 115, 22, 0.2);
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            margin-top: auto;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .footer {
+            padding-top: 1rem;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 2.5rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .view-section {
+            display: none;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--success);
+            background: rgba(34, 197, 94, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.1);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .robot-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .robot-status {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .battery-container {
+            margin-bottom: 1.75rem;
+        }
+
+        .battery-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .battery-bar-bg {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .battery-bar-fill {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.85rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-secondary);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .zone-select {
+            grid-column: span 2;
+            padding: 0.85rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            border-radius: 0.75rem;
+            outline: none;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .zone-select:hover {
+            border-color: var(--text-secondary);
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+
+            70% {
+                opacity: 1;
+                box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+            }
+
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
+        }
+
+        /* Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+        }
+
+        /* Live Map Canvas */
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid var(--card-border);
+        }
+
+        #live-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .live-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Terminal Logs */
+        .terminal {
+            background-color: #0f172a;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #22c55e;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--card-border);
+        }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+            opacity: 0.8;
+        }
+
+        .log-time {
+            color: #64748b;
+            margin-right: 0.5rem;
+        }
+
+        /* Tables */
+        .table-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1.25rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.85rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            border-radius: 0.75rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.2);
+            transform: translateY(150%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span>●</span> Matic Hub
+        </div>
+
+        <div class="nav-item active" onclick="switchView('dashboard')">Dashboard</div>
+        <div class="nav-item" onclick="switchView('schedules')">Schedules</div>
+        <div class="nav-item" onclick="switchView('history')">History</div>
+        <div class="nav-item" onclick="switchView('settings')">Settings</div>
+        <div class="nav-item" onclick="switchView('why')">Why This App?</div>
+        <div class="nav-item" onclick="switchView('how-it-works')">How It Works</div>
+
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+        </button>
+
+        <div class="footer">
+            Made with ❤️ by <br>
+            <a href="mailto:agarw574@purdue.edu">Aarush Agarwal</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard" class="view-section active">
+            <div class="header">
+                <h1>Dashboard</h1>
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    <span id="system-status">System Online</span>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-label">Active Robots</div>
+                    <div class="stat-value" id="active-robots">1</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Area Cleaned</div>
+                    <div class="stat-value">1,240 ft²</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Battery</div>
+                    <div class="stat-value" id="avg-battery">--%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Uptime</div>
+                    <div class="stat-value">4d 12h</div>
+                </div>
+            </div>
+
+            <div class="grid" style="grid-template-columns: 2fr 1fr;">
+                <!-- Live Map Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="robot-name">Live Mapping</h3>
+                        <div class="robot-status" style="color: var(--accent)">● Active</div>
+                    </div>
+                    <div class="map-container">
+                        <canvas id="live-map"></canvas>
+                        <div class="map-overlay">
+                            <div class="live-indicator"></div>
+                            LIVE FEED
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 10px; height: 10px; background: var(--accent); border-radius: 2px;">
+                            </div> Robot
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div
+                                style="width: 10px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 2px;">
+                            </div> Cleaned
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div
+                                style="width: 10px; height: 10px; background: transparent; border: 1px solid var(--text-secondary); border-radius: 2px;">
+                            </div> Unmapped
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Robot Controls & Logs -->
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <div id="robots-grid" style="display: contents;">
+                        <!-- Robot cards injected here -->
+                    </div>
+
+                    <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="card-header" style="margin-bottom: 1rem;">
+                            <h3 class="robot-name" style="font-size: 1rem;">System Logs</h3>
+                        </div>
+                        <div class="terminal" id="terminal-logs">
+                            <div class="log-entry"><span class="log-time">10:00:01</span> System initialized</div>
+                            <div class="log-entry"><span class="log-time">10:00:02</span> MQTT Broker connected</div>
+                            <div class="log-entry"><span class="log-time">10:00:05</span> Discovered 1 Matic Robot</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCHEDULES VIEW -->
+        <div id="view-schedules" class="view-section">
+            <div class="header">
+                <h1>Schedules</h1>
+                <button class="btn btn-primary" onclick="showToast('Feature coming soon')">+ New
+                    Schedule</button>
+            </div>
+            <div class="table-container">
+                <table id="schedules-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Time</th>
+                            <th>Days</th>
+                            <th>Zone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Schedules injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HISTORY VIEW -->
+        <div id="view-history" class="view-section">
+            <div class="header">
+                <h1>Cleaning History</h1>
+            </div>
+            <div class="table-container">
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Duration</th>
+                            <th>Area Cleaned</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- History injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SETTINGS VIEW -->
+        <div id="view-settings" class="view-section">
+            <div class="header">
+                <h1>Settings</h1>
+            </div>
+            <div class="card" style="max-width: 600px">
+                <div class="form-group">
+                    <label class="form-label">Hub Name</label>
+                    <input type="text" class="form-input" value="Matic Home Hub">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">MQTT Broker URL</label>
+                    <input type="text" class="form-input" value="mosquitto">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">MQTT Port</label>
+                    <input type="number" class="form-input" value="1883">
+                </div>
+                <button class="btn btn-primary" onclick="showToast('Settings saved')">Save Changes</button>
+            </div>
+        </div>
+
+        <!-- WHY THIS APP VIEW -->
+        <div id="view-why" class="view-section">
+            <div class="header">
+                <h1>Why Matic Hub?</h1>
+            </div>
+
+            <div style="margin-bottom: 3rem;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">The Local-First
+                    Revolution</h2>
+                <p style="color: var(--text-secondary); max-width: 800px; margin-bottom: 2rem; line-height: 1.6;">
+                    Most "smart" devices today are just remote-controlled terminals for a cloud server thousands of
+                    miles away.
+                    They send your usage data, map layouts, and sometimes even video feeds to third parties.
+                    <strong>We believe this is fundamentally wrong.</strong>
+                </p>
+
+                <div class="grid">
+                    <div class="card">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">🔒</div>
+                        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Privacy First</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Your floor plan is your business. No
+                            map data or camera feeds ever leave your local network.</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">⚡</div>
+                        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Zero Latency</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Local control means instant response
+                            times. No round-trip to the cloud required.</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">🌐</div>
+                        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Works Offline</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Internet down? No problem. Your
+                            automations and controls continue to work perfectly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--accent);">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-primary);">🎯 Why This is Perfect
+                    for Matic</h2>
+                <div style="display: grid; gap: 1rem;">
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="color: var(--success); font-weight: bold;">✅</span>
+                        <div>
+                            <strong style="display: block; margin-bottom: 0.25rem;">Directly addresses user
+                                needs</strong>
+                            <span style="color: var(--text-secondary);">Fulfills the co-founder's Reddit request for
+                                MQTT/home automation support.</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="color: var(--success); font-weight: bold;">✅</span>
+                        <div>
+                            <strong style="display: block; margin-bottom: 0.25rem;">Maintains Privacy Values</strong>
+                            <span style="color: var(--text-secondary);">100% local, no cloud dependencies. Aligns
+                                perfectly with Matic's privacy-first philosophy.</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="color: var(--success); font-weight: bold;">✅</span>
+                        <div>
+                            <strong style="display: block; margin-bottom: 0.25rem;">Competitive Differentiator</strong>
+                            <span style="color: var(--text-secondary);">Most robot vacuums require cloud. This hub
+                                proves Matic is different.</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="color: var(--success); font-weight: bold;">✅</span>
+                        <div>
+                            <strong style="display: block; margin-bottom: 0.25rem;">Open Source Ready</strong>
+                            <span style="color: var(--text-secondary);">Can be released on GitHub to build trust and
+                                community contributions.</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="color: var(--success); font-weight: bold;">✅</span>
+                        <div>
+                            <strong style="display: block; margin-bottom: 0.25rem;">Revenue Opportunity</strong>
+                            <span style="color: var(--text-secondary);">Potential for premium support or commercial
+                                licensing models for integrators.</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="color: var(--success); font-weight: bold;">✅</span>
+                        <div>
+                            <strong style="display: block; margin-bottom: 0.25rem;">Community Engagement</strong>
+                            <span style="color: var(--text-secondary);">Appeals directly to Home Assistant and smart
+                                home enthusiasts.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOW IT WORKS VIEW -->
+        <div id="view-how-it-works" class="view-section">
+            <div class="header">
+                <h1>How It Works</h1>
+            </div>
+
+            <div style="margin-bottom: 3rem;">
+                <p style="color: var(--text-secondary); max-width: 800px; margin-bottom: 2rem; line-height: 1.6;">
+                    The Matic Hub acts as a <strong>universal translator</strong> between your Matic robots and the rest
+                    of your smart home.
+                    It runs entirely on your local network, ensuring speed and privacy.
+                </p>
+
+                <div class="card" style="margin-bottom: 2rem; overflow-x: auto;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem;">System Architecture</h3>
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; min-width: 600px; gap: 1rem; padding: 1rem 0;">
+
+                        <!-- Matic Robot -->
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🤖</div>
+                            <div style="font-weight: 700; margin-bottom: 0.25rem;">Matic Robot</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Local API</div>
+                        </div>
+
+                        <!-- Arrow -->
+                        <div style="flex: 1; height: 2px; background: var(--card-border); position: relative;">
+                            <div
+                                style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: var(--text-secondary); background: var(--card-bg); padding: 0 0.5rem; border-radius: 4px;">
+                                Wi-Fi</div>
+                        </div>
+
+                        <!-- Matic Hub -->
+                        <div
+                            style="text-align: center; background: rgba(249, 115, 22, 0.1); padding: 1rem; border-radius: 1rem; border: 1px solid var(--accent);">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚡</div>
+                            <div style="font-weight: 700; margin-bottom: 0.25rem; color: var(--accent);">Matic Hub</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Translation Layer</div>
+                        </div>
+
+                        <!-- Arrow -->
+                        <div style="flex: 1; height: 2px; background: var(--card-border); position: relative;">
+                            <div
+                                style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: var(--text-secondary); background: var(--card-bg); padding: 0 0.5rem; border-radius: 4px;">
+                                MQTT</div>
+                        </div>
+
+                        <!-- Home Assistant -->
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏠</div>
+                            <div style="font-weight: 700; margin-bottom: 0.25rem;">Home Assistant</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Smart Home</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <div style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent);">1. Discovery</div>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                            The Hub automatically scans your local network for Matic robots. No manual IP configuration
+                            needed. It identifies them securely and establishes a local connection.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent);">2. Translation</div>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                            Matic speaks its own language. The Hub translates this into <strong>MQTT</strong>, the
+                            universal standard for smart home devices. This makes Matic compatible with everything.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent);">3. Control</div>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                            When you press "Clean Kitchen" in Home Assistant, the message goes to the Hub, which
+                            instantly tells the robot to start cleaning that specific zone.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Command Sent</div>
+
+    <script>
+        const API_URL = '/api/v1';
+        // Auto-detect if running on GitHub Pages or local file
+        const IS_DEMO = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+
+        // Mock Data for Demo Mode
+        const MOCK_ROBOTS = [{
+            id: 'matic-1',
+            state: 'cleaning',
+            battery: 85
+        }];
+        const MOCK_SCHEDULES = [
+            { id: '1', name: 'Daily Clean', time: '09:00', days: ['Mon', 'Wed', 'Fri'], zone: 'Whole House', enabled: true },
+            { id: '2', name: 'Kitchen After Dinner', time: '20:30', days: ['Daily'], zone: 'Kitchen', enabled: true }
+        ];
+        const MOCK_HISTORY = [
+            { date: 'Today, 9:00 AM', duration: '45m', area: 450, status: 'Completed' },
+            { date: 'Yesterday, 9:00 AM', duration: '42m', area: 440, status: 'Completed' }
+        ];
+
+        // Navigation
+        function switchView(viewName) {
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+                if (el.textContent.toLowerCase() === viewName) el.classList.add('active');
+            });
+
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(`view-${viewName}`).classList.add('active');
+
+            if (viewName === 'schedules') fetchSchedules();
+            if (viewName === 'history') fetchHistory();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // --- ROBOTS ---
+        async function sendCommand(robotId, command, payload = null) {
+            if (IS_DEMO) {
+                showToast(`[DEMO] ${command} sent to ${robotId}`);
+                if (command === 'start') MOCK_ROBOTS[0].state = 'cleaning';
+                if (command === 'pause') MOCK_ROBOTS[0].state = 'paused';
+                if (command === 'stop') MOCK_ROBOTS[0].state = 'idle';
+                fetchRobots();
+                return;
+            }
+
+            try {
+                const options = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                if (payload) options.body = JSON.stringify(payload);
+
+                const res = await fetch(`${API_URL}/robots/${robotId}/commands/${command}`, options);
+                if (res.ok) {
+                    showToast(`${command} command sent`);
+                    fetchRobots();
+                } else {
+                    showToast('Error sending command');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Network error - Switching to Demo Mode');
+                // Fallback to demo mode if backend is unreachable
+                // IS_DEMO = true; // Optional: Auto-enable demo mode
+            }
+        }
+
+        function getStatusColor(state) {
+            switch (state) {
+                case 'cleaning': return 'var(--accent)';
+                case 'error': return 'var(--danger)';
+                case 'paused': return 'var(--warning)';
+                default: return 'var(--text-secondary)';
+            }
+        }
+
+        function renderRobot(robot) {
+            const batteryColor = robot.battery < 20 ? 'var(--danger)' : 'var(--success)';
+
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="robot-name">Main Floor Matic</div>
+                            <div class="robot-status" style="color: ${getStatusColor(robot.state)}">● ${robot.state.toUpperCase()}</div>
+                        </div>
+                        <div style="font-size: 2rem; opacity: 0.8; filter: drop-shadow(0 0 10px var(--accent-glow));">🤖</div>
+                    </div>
+                    
+                    <div class="battery-container">
+                        <div class="battery-label">
+                            <span>Battery</span>
+                            <span>${robot.battery}%</span>
+                        </div>
+                        <div class="battery-bar-bg">
+                            <div class="battery-bar-fill" style="width: ${robot.battery}%; background-color: ${batteryColor}"></div>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        ${robot.state === 'cleaning'
+                    ? `<button class="btn btn-secondary" onclick="sendCommand('${robot.id}', 'pause')">Pause</button>`
+                    : `<button class="btn btn-primary" onclick="sendCommand('${robot.id}', 'start')">Start</button>`
+                }
+                        <button class="btn btn-secondary" onclick="sendCommand('${robot.id}', 'stop')">Stop</button>
+                        
+                        <select class="zone-select" onchange="if(this.value) sendCommand('${robot.id}', 'zone', {zone: this.value}); this.value=''">
+                            <option value="">Clean Specific Zone...</option>
+                            <option value="kitchen">Kitchen</option>
+                            <option value="living_room">Living Room</option>
+                            <option value="bedroom">Bedroom</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function fetchRobots() {
+            if (IS_DEMO) {
+                const grid = document.getElementById('robots-grid');
+                grid.innerHTML = MOCK_ROBOTS.map(renderRobot).join('');
+                document.getElementById('active-robots').textContent = MOCK_ROBOTS.length;
+                document.getElementById('avg-battery').textContent = `${MOCK_ROBOTS[0].battery}%`;
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/robots`);
+                const robots = await res.json();
+
+                const grid = document.getElementById('robots-grid');
+                grid.innerHTML = robots.map(renderRobot).join('');
+
+                document.getElementById('active-robots').textContent = robots.length;
+                const avgBat = Math.round(robots.reduce((acc, r) => acc + r.battery, 0) / robots.length);
+                document.getElementById('avg-battery').textContent = `${avgBat}%`;
+                document.getElementById('system-status').textContent = 'System Online';
+                document.getElementById('system-status').style.color = 'var(--success)';
+
+            } catch (e) {
+                console.error("Failed to fetch robots", e);
+                document.getElementById('system-status').textContent = 'Offline (Demo)';
+                document.getElementById('system-status').style.color = 'var(--warning)';
+            }
+        }
+
+        // --- SCHEDULES ---
+        async function fetchSchedules() {
+            const data = IS_DEMO ? MOCK_SCHEDULES : await (await fetch(`${API_URL}/schedules`)).json();
+
+            const tbody = document.querySelector('#schedules-table tbody');
+            tbody.innerHTML = data.map(s => `
+                <tr>
+                    <td>${s.name}</td>
+                    <td>${s.time}</td>
+                    <td>${s.days.join(', ')}</td>
+                    <td>${s.zone || 'Whole House'}</td>
+                    <td><span style="color: ${s.enabled ? 'var(--success)' : 'var(--text-secondary)'}">● ${s.enabled ? 'Active' : 'Disabled'}</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem" onclick="deleteSchedule('${s.id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function deleteSchedule(id) {
+            if (!confirm('Are you sure?')) return;
+            if (IS_DEMO) {
+                const idx = MOCK_SCHEDULES.findIndex(s => s.id === id);
+                if (idx > -1) MOCK_SCHEDULES.splice(idx, 1);
+            } else {
+                await fetch(`${API_URL}/schedules/${id}`, { method: 'DELETE' });
+            }
+            fetchSchedules();
+            showToast('Schedule deleted');
+        }
+
+        // --- HISTORY ---
+        async function fetchHistory() {
+            const data = IS_DEMO ? MOCK_HISTORY : await (await fetch(`${API_URL}/history`)).json();
+
+            const tbody = document.querySelector('#history-table tbody');
+            tbody.innerHTML = data.map(h => `
+                <tr>
+                    <td>${h.date}</td>
+                    <td>${h.duration}</td>
+                    <td>${h.area} ft²</td>
+                    <td><span style="color: var(--success)">${h.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // --- LIVE MAP SIMULATION ---
+        const canvas = document.getElementById('live-map');
+        const ctx = canvas.getContext('2d');
+        let robotPos = { x: 150, y: 150 };
+        let robotDir = { x: 1, y: 0.5 };
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Draw a simple floor plan
+        function drawMap() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw "cleaned" path trail
+            ctx.fillStyle = 'rgba(249, 115, 22, 0.1)';
+            ctx.beginPath();
+            ctx.arc(robotPos.x, robotPos.y, 15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Move robot
+            robotPos.x += robotDir.x;
+            robotPos.y += robotDir.y;
+
+            // Bounce off walls
+            if (robotPos.x < 20 || robotPos.x > canvas.width - 20) robotDir.x *= -1;
+            if (robotPos.y < 20 || robotPos.y > canvas.height - 20) robotDir.y *= -1;
+
+            // Draw Robot
+            ctx.fillStyle = '#f97316';
+            ctx.shadowColor = '#f97316';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(robotPos.x, robotPos.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            requestAnimationFrame(drawMap);
+        }
+        drawMap();
+
+        // --- LOG SIMULATION ---
+        function addLog(message) {
+            const terminal = document.getElementById('terminal-logs');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span class="log-time">${time}</span> ${message}`;
+            terminal.appendChild(entry);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Simulate logs occasionally
+        setInterval(() => {
+            const logs = [
+                "MQTT: Published status update",
+                "Battery level: 85%",
+                "Lidar scan completed",
+                "Path planning update",
+                "Zone 'Kitchen' verified"
+            ];
+            if (Math.random() > 0.7) {
+                addLog(logs[Math.floor(Math.random() * logs.length)]);
+            }
+        }, 2000);
+
+
+        // Theme Management
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            if (theme === 'light') {
+                icon.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+            } else {
+                icon.textContent = '☀️';
+                text.textContent = 'Light Mode';
+            }
+        }
+
+        // Initialize Theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        // Initial load
+        fetchRobots();
+        // Poll every 2 seconds
+        setInterval(fetchRobots, 2000);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+paho-mqtt
+websockets
+aiohttp
+python-multipart
+jinja2
