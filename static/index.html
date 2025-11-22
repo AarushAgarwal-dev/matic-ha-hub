@@ -23,7 +23,7 @@
             --success: #22c55e;
             --warning: #eab308;
             --danger: #ef4444;
-            --sidebar-bg: rgba(15, 23, 42, 0.8);
+            --sidebar-bg: rgba(15, 23, 42, 0.95);
             --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
@@ -39,7 +39,7 @@
             --success: #16a34a;
             --warning: #ca8a04;
             --danger: #dc2626;
-            --sidebar-bg: rgba(255, 255, 255, 0.8);
+            --sidebar-bg: rgba(255, 255, 255, 0.95);
             --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
 
@@ -58,10 +58,11 @@
                 radial-gradient(at 100% 100%, rgba(34, 197, 94, 0.1) 0px, transparent 50%);
             background-attachment: fixed;
             color: var(--text-primary);
-            min-height: 100vh;
+            height: 100vh;
+            /* Fixed height for full viewport */
             display: flex;
             overflow: hidden;
-            /* Prevent body scroll, main handles it */
+            /* Prevent body scroll, let children scroll */
         }
 
         /* Sidebar */
@@ -75,6 +76,10 @@
             display: flex;
             flex-direction: column;
             z-index: 10;
+            height: 100%;
+            overflow-y: auto;
+            /* Allow sidebar to scroll on small screens */
+            flex-shrink: 0;
         }
 
         .logo {
@@ -86,6 +91,7 @@
             align-items: center;
             gap: 0.75rem;
             letter-spacing: -0.5px;
+            flex-shrink: 0;
         }
 
         .logo span {
@@ -106,6 +112,7 @@
             cursor: pointer;
             font-weight: 500;
             border: 1px solid transparent;
+            flex-shrink: 0;
         }
 
         .nav-item:hover {
@@ -121,9 +128,12 @@
             font-weight: 600;
         }
 
+        .spacer {
+            flex: 1;
+        }
+
         .theme-toggle {
-            margin-top: auto;
-            margin-bottom: 1rem;
+            margin-top: 1rem;
             padding: 0.75rem;
             border-radius: 0.75rem;
             background-color: rgba(255, 255, 255, 0.05);
@@ -135,6 +145,7 @@
             justify-content: center;
             gap: 0.5rem;
             font-weight: 500;
+            flex-shrink: 0;
         }
 
         .theme-toggle:hover {
@@ -143,12 +154,14 @@
         }
 
         .footer {
+            margin-top: 1rem;
             padding-top: 1rem;
             border-top: 1px solid var(--card-border);
             font-size: 0.8rem;
             color: var(--text-secondary);
             text-align: center;
             line-height: 1.5;
+            flex-shrink: 0;
         }
 
         .footer a {
@@ -161,13 +174,18 @@
         .main {
             flex: 1;
             padding: 2.5rem;
+            height: 100%;
             overflow-y: auto;
+            /* Enable scrolling for main content */
             position: relative;
+            scroll-behavior: smooth;
         }
 
         .view-section {
             display: none;
             animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            padding-bottom: 4rem;
+            /* Extra padding at bottom for scrolling space */
         }
 
         .view-section.active {
@@ -202,6 +220,12 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
         .status-badge {
             display: flex;
             align-items: center;
@@ -214,6 +238,7 @@
             font-weight: 600;
             border: 1px solid rgba(34, 197, 94, 0.2);
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.1);
+            cursor: pointer;
         }
 
         .status-dot {
@@ -223,6 +248,64 @@
             border-radius: 50%;
             animation: pulse 2s infinite;
             box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: var(--card-bg);
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            border: 1px solid var(--card-border);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 32px;
+            height: 18px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--card-border);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--accent);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(14px);
         }
 
         /* Grid */
@@ -604,6 +687,8 @@
         <div class="nav-item" onclick="switchView('why')">Why This App?</div>
         <div class="nav-item" onclick="switchView('how-it-works')">How It Works</div>
 
+        <div class="spacer"></div>
+
         <button class="theme-toggle" onclick="toggleTheme()">
             <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
         </button>
@@ -619,9 +704,18 @@
         <div id="view-dashboard" class="view-section active">
             <div class="header">
                 <h1>Dashboard</h1>
-                <div class="status-badge">
-                    <div class="status-dot"></div>
-                    <span id="system-status">System Online</span>
+                <div class="header-controls">
+                    <div class="toggle-switch">
+                        <span>Demo Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="demo-toggle" onchange="toggleDemoMode(this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="status-badge">
+                        <div class="status-dot"></div>
+                        <span id="system-status">System Online</span>
+                    </div>
                 </div>
             </div>
 
@@ -949,7 +1043,7 @@
     <script>
         const API_URL = '/api/v1';
         // Auto-detect if running on GitHub Pages or local file
-        const IS_DEMO = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+        let IS_DEMO = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
 
         // Mock Data for Demo Mode
         const MOCK_ROBOTS = [{
@@ -966,17 +1060,40 @@
             { date: 'Yesterday, 9:00 AM', duration: '42m', area: 440, status: 'Completed' }
         ];
 
+        // Toggle Demo Mode
+        function toggleDemoMode(enabled) {
+            IS_DEMO = enabled;
+            if (enabled) {
+                showToast('Demo Mode Activated');
+                document.getElementById('system-status').textContent = 'Demo Mode';
+                document.getElementById('system-status').style.color = 'var(--warning)';
+            } else {
+                showToast('Connecting to Hub...');
+                document.getElementById('system-status').textContent = 'Connecting...';
+                document.getElementById('system-status').style.color = 'var(--text-secondary)';
+            }
+            fetchRobots();
+            switchView(document.querySelector('.nav-item.active').textContent.toLowerCase().replace(' ', '-'));
+        }
+
+        // Initialize Demo Toggle
+        document.getElementById('demo-toggle').checked = IS_DEMO;
+
         // Navigation
         function switchView(viewName) {
             document.querySelectorAll('.nav-item').forEach(el => {
                 el.classList.remove('active');
-                if (el.textContent.toLowerCase() === viewName) el.classList.add('active');
+                if (el.textContent.toLowerCase().replace(' ', '-') === viewName) el.classList.add('active');
             });
 
             document.querySelectorAll('.view-section').forEach(el => {
                 el.classList.remove('active');
             });
-            document.getElementById(`view-${viewName}`).classList.add('active');
+
+            const targetView = document.getElementById(`view-${viewName}`);
+            if (targetView) {
+                targetView.classList.add('active');
+            }
 
             if (viewName === 'schedules') fetchSchedules();
             if (viewName === 'history') fetchHistory();
@@ -1154,14 +1271,17 @@
         let robotDir = { x: 1, y: 0.5 };
 
         function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+            if (canvas && canvas.parentElement) {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
         }
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        setTimeout(resizeCanvas, 100); // Initial resize
 
         // Draw a simple floor plan
         function drawMap() {
+            if (!ctx) return;
             ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -1195,6 +1315,7 @@
         // --- LOG SIMULATION ---
         function addLog(message) {
             const terminal = document.getElementById('terminal-logs');
+            if (!terminal) return;
             const entry = document.createElement('div');
             entry.className = 'log-entry';
             const time = new Date().toLocaleTimeString();
